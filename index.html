@@ -1,359 +1,127 @@
-<!DOCTYPE HTML>
-<html lang="ar">
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
 <head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-    <meta name="theme-color" content="#FFD700"/>
-    <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
-    <title>SALEM | سـالـم - Interactive Developer</title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins:400,700&display=swap"/>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/typed.js/2.0.10/typed.min.js"></script>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r148/three.min.js"></script>
-    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ساعة تناظرية متطورة</title>
     <style>
-        :root {
-            /* الألوان الفخمة المعتمدة */
-            --back_color: radial-gradient(circle at center, #0a192f 0%, #020c1b 100%);
-            --front_color: rgba(10, 25, 47, 0.75); /* شفافية لزيادة الـ Blur */
-            --gold: #FFD700;
-            --muted-gold: #c5a059;
-            --deep-blue: #1A2980;
-            --white: #e6f1ff;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
-            -webkit-tap-highlight-color: transparent; /* حذف التأثير الافتراضي للمس على آيفون */
-        }
-
         body {
-            background: var(--back_color);
-            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             height: 100vh;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            touch-action: none; /* منع تمرير الصفحة على الموبايل */
+            margin: 0;
+            background-color: #f0f2f5;
+            font-family: sans-serif;
         }
 
-        .vcard {
-            width: 90%;
-            max-width: 420px;
-            height: 580px;
-            background: var(--front_color);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            border-radius: 24px;
-            border: 1px solid rgba(197, 160, 89, 0.2);
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
-            position: relative;
-            overflow: hidden;
-            z-index: 10;
-        }
-
-        .header {
-            height: 35%;
-            position: relative;
-        }
-
-        /* حاوية الـ Canvas الخاصة بالأمواج */
-        #canvas-container {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            z-index: 0;
-            pointer-events: none; /* لمنع حجب النقرات عن الأيقونات */
-        }
-
-        .profile_pic_content {
-            width: 135px;
-            height: 135px;
+        .clock {
+            width: 300px;
+            height: 300px;
+            background-color: white;
+            border: 10px solid #333;
             border-radius: 50%;
-            position: absolute;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            top: 100%;
-            overflow: hidden;
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
-            border: 3px solid var(--muted-gold);
-            background-color: #000;
-            z-index: 20;
+            position: relative;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
         }
 
-        .profile_video {
+        /* نقطة المركز */
+        .clock::after {
+            content: '';
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background-color: #333;
+            top: 50%;
+            left: 50%;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+        }
+
+        .hand {
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            transform-origin: bottom;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+            transform: translateX(-50%);
+        }
+
+        .hour {
+            width: 8px;
+            height: 60px;
+            background-color: #333;
+            z-index: 3;
+        }
+
+        .minute {
+            width: 6px;
+            height: 90px;
+            background-color: #666;
+            z-index: 2;
+        }
+
+        .second {
+            width: 2px;
+            height: 110px;
+            background-color: #e74c3c;
+            z-index: 1;
+            /* إضافة تنعيم بسيط لحركة الثواني */
+            transition: transform 0.2s cubic-bezier(0.4, 2.08, 0.55, 0.44);
+        }
+
+        /* إضافة أرقام وهمية كتصميم */
+        .number {
+            position: absolute;
             width: 100%;
             height: 100%;
-            object-fit: cover;
-        }
-
-        .card_content {
-            padding-top: 85px;
             text-align: center;
-            z-index: 20;
-            position: relative;
-        }
-
-        .satan h4 {
-            font-size: 1.9em;
-            letter-spacing: 3px;
-            background: linear-gradient(to right, var(--gold), var(--white));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 12px;
-            font-weight: 700;
-        }
-
-        .snuff {
-            min-height: 100px;
-            padding: 0 30px;
-            color: #8892b0;
-            font-size: 0.95em;
-            line-height: 1.6;
-        }
-
-        .social {
-            margin-top: 20px;
-        }
-
-        .social div {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .social a {
-            text-decoration: none;
-            cursor: pointer;
-            z-index: 30;
-            position: relative;
-        }
-
-        .social i {
-            padding: 12px;
-            font-size: 1.3em;
-            background: rgba(197, 160, 89, 0.05);
-            border-radius: 14px;
-            border: 1px solid rgba(197, 160, 89, 0.1);
-            color: var(--muted-gold);
-            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            pointer-events: auto; /* تأكيد استقبال اللمس */
-        }
-
-        .social a:hover i { 
-            color: var(--gold) !important; 
-            background: rgba(197, 160, 89, 0.15);
-            transform: translateY(-5px);
-            border-color: var(--gold);
-            box-shadow: 0 5px 15px rgba(197, 160, 89, 0.2);
-        }
-
-        .footer-text {
-            position: absolute;
-            bottom: 20px;
-            width: 100%;
-            font-size: 0.75em;
-            color: rgba(136, 146, 176, 0.4);
-            text-align: center;
-            z-index: 10;
+            font-weight: bold;
+            font-size: 1.2rem;
+            padding: 10px;
+            box-sizing: border-box;
         }
     </style>
 </head>
 <body>
 
-<div class="vcard">
-    <div class="header">
-        <div id="canvas-container"></div>
+    <div class="clock">
+        <div class="number" style="transform: rotate(0deg)">12</div>
+        <div class="number" style="transform: rotate(90deg)">3</div>
+        <div class="number" style="transform: rotate(180deg)">6</div>
+        <div class="number" style="transform: rotate(270deg)">9</div>
         
-        <div class="profile_pic_content">
-            <video class="profile_video" autoplay loop muted playsinline poster="iou.jpg">
-                <source src="https://files.catbox.moe/jvicv4.mp4" type="video/mp4">
-            </video>
-        </div>
+        <div class="hand hour" id="hour"></div>
+        <div class="hand minute" id="minute"></div>
+        <div class="hand second" id="second"></div>
     </div>
 
-    <div class="card_content">
-        <div class="satan">
-            <h4>SALEM</h4>
-        </div>
+    <script>
+        function updateClock() {
+            const now = new Date();
+            
+            const seconds = now.getSeconds();
+            const minutes = now.getMinutes();
+            const hours = now.getHours();
+
+            // الحسابات الرياضية للزوايا
+            const secondDeg = seconds * 6;
+            const minuteDeg = (minutes * 6) + (seconds * 0.1);
+            const hourDeg = ((hours % 12) * 30) + (minutes * 0.5);
+
+            // تطبيق الدوران
+            document.getElementById("second").style.transform = `translateX(-50%) rotate(${secondDeg}deg)`;
+            document.getElementById("minute").style.transform = `translateX(-50%) rotate(${minuteDeg}deg)`;
+            document.getElementById("hour").style.transform = `translateX(-50%) rotate(${hourDeg}deg)`;
+        }
+
+        // تحديث كل ثانية
+        setInterval(updateClock, 1000);
         
-        <div class="snuff">
-            <h5 class="typed_text"></h5>
-        </div>
-
-        <div class="social">
-            <div>
-                <a href="https://t.me/kokksha" title="Telegram"><i class="fab fa-telegram"></i></a>
-                <a href="https://www.facebook.com/share/15KQ2NmX9V/" title="Facebook"><i class="fab fa-facebook"></i></a>
-                <a href="https://www.instagram.com/_u_vf?igsh=bXRqd2Z4ZWhteW94" title="Instagram"><i class="fab fa-instagram"></i></a>
-                <a href="https://github.com/salemalshamrie" title="GitHub"><i class="fab fa-github"></i></a>
-                <a href="tg://settings" title="Profile Settings"><i class="fas fa-user"></i></a>
-                <a href="https://g.co/kgs/pXVXQxK" title="Sports"><i class="fas fa-futbol"></i></a>
-                <a href="https://uokerbala.edu.iq/" title="University"><i class="fas fa-university"></i></a>
-            </div>
-        </div>
-    </div>
-
-    <p class="footer-text">
-        © 2024-2026 Salem Al-Shammari | Karbala, Iraq
-    </p>
-</div>
-
-<script id="vertexShader" type="x-shader/x-vertex">
-    varying vec2 vUv;
-    varying float vOffset;
-    uniform float uTime;
-    uniform float uTouch;
-
-    // دالة Sine متقدمة لإنشاء تموجات تداخلية
-    void main() {
-        vUv = uv;
-        
-        // حساب التموجات بناءً على الوقت واللمس
-        float strength = 0.08 + uTouch * 0.15; // تزايد قوة الموجة عند اللمس
-        float x_wave = sin(position.x * 2.0 + uTime * 0.8) * strength;
-        float z_wave = sin(position.z * 1.5 + uTime * 0.6) * strength;
-        float wave = x_wave + z_wave;
-        
-        vOffset = wave; // لتمرير قيمة الموجة للفرغمنت شيدر
-
-        vec3 newPosition = position + vec3(0.0, wave, 0.0);
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
-    }
-</script>
-
-<script id="fragmentShader" type="x-shader/x-fragment">
-    varying vec2 vUv;
-    varying float vOffset;
-    uniform float uTime;
-
-    void main() {
-        // الألوان المعتمدة للبطاقة الملكية (Midnight Blue & Gold Glow)
-        vec3 deepBlue = vec3(0.015, 0.035, 0.08); // تدرج داكن للأزرق
-        vec3 goldColor = vec3(0.95, 0.82, 0.35); // تدرج ذهبي متوهج
-
-        // إنشاء تدرج لوني عميق (Deep Gradient)
-        float mix_val = (vUv.y * 0.6) + (vOffset * 0.4);
-        vec3 final_color = mix(deepBlue, deepBlue * 1.8, mix_val);
-        
-        // إضافة توهج ذهبي خفيف فوق الأمواج (Glow-effect)
-        float glow = clamp(vOffset, 0.0, 1.0) * 1.8;
-        final_color += goldColor * glow;
-
-        gl_FragColor = vec4(final_color, 1.0);
-    }
-</script>
-
-<script>
-    // إعداد الـ Three.js الأساسي لبطاقة VCard
-    let container = document.getElementById('canvas-container');
-    let scene, camera, renderer, mesh;
-    let clock = new THREE.Clock();
-    let touchStrength = 0; // متيّر لقياس قوة اللمس
-    let isTouch = false;
-
-    init();
-    animate();
-
-    function init() {
-        scene = new THREE.Scene();
-        
-        // الكاميرا Perspective لرؤية الأبعاد
-        camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 100);
-        camera.position.set(0, 0, 1.3);
-
-        // إعداد هندسة الموجة (سطح مستو بآلاف النقاط)
-        const geometry = new THREE.PlaneGeometry(3, 1.5, 64, 64);
-        geometry.rotateX(-Math.PI * 0.1); // إمالة خفيفة للسطح
-
-        // إعداد الـ Shader Material بالألوان والوقت
-        const material = new THREE.ShaderMaterial({
-            vertexShader: document.getElementById('vertexShader').textContent,
-            fragmentShader: document.getElementById('fragmentShader').textContent,
-            uniforms: {
-                uTime: { value: 0.0 },
-                uTouch: { value: 0.0 }, // قيمة اللمس الأولية
-            },
-            transparent: true,
-            depthWrite: false, // لضمان ظهور الـ Canvas خلف بقية العناصر
-        });
-
-        mesh = new THREE.Mesh(geometry, material);
-        scene.add(mesh);
-
-        // إعداد الـ Renderer المصغر لآيفون
-        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        renderer.setPixelRatio(window.devicePixelRatio); // لتوافق شاشة ريتينا
-        renderer.setSize(container.clientWidth, container.clientHeight);
-        renderer.toneMapping = THREE.ACESFilmicToneMapping; // لتوهج لوني فخم
-        container.appendChild(renderer.domElement);
-
-        // التعامل مع تغير حجم الشاشة
-        window.addEventListener('resize', onWindowResize, false);
-        
-        // إضافة تفاعل اللمس (التفاعلي)
-        container.addEventListener('touchstart', onTouchStart, false);
-        container.addEventListener('touchend', onTouchEnd, false);
-        // دعم حركة الفأرة (للتوافق)
-        window.addEventListener('mousedown', onTouchStart, false);
-        window.addEventListener('mouseup', onTouchEnd, false);
-    }
-
-    // دوال التعامل مع اللمس التفاعلي
-    function onTouchStart() { isTouch = true; }
-    function onTouchEnd() { isTouch = false; }
-
-    function onWindowResize() {
-        camera.aspect = container.clientWidth / container.clientHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(container.clientWidth, container.clientHeight);
-    }
-
-    // دالة الأنيميشن المستمرة
-    function animate() {
-        requestAnimationFrame(animate);
-        const elapsedTime = clock.getElapsedTime();
-        
-        // تحديث الوقت للـ Shader لتدوير الأمواج
-        mesh.material.uniforms.uTime.value = elapsedTime;
-        
-        // تحديث شدة اللمس بنعومة (Smoothing)
-        const targetTouch = isTouch ? 1.0 : 0.0;
-        touchStrength += (targetTouch - touchStrength) * 0.08; // تمهيد التغيير
-        mesh.material.uniforms.uTouch.value = touchStrength;
-        
-        // تدوير خفيف للمشهد عند اللمس (اختياري)
-        mesh.rotation.y = Math.sin(elapsedTime * 0.2) * 0.03 * touchStrength;
-        
-        renderer.render(scene, camera);
-    }
-</script>
-
-<script>
-    // إعدادات الـ Typed.js النهائية مع الحروف الكبيرة
-    var options = {
-        strings: [
-            "Web Designer & Creative Developer.", 
-            "Turning code into visual art.", 
-            "<span style='color: #FFD700; font-weight: bold;'>BELIEVE IN YOURSELF</span>, NOTHING IS IMPOSSIBLE."
-        ],
-        typeSpeed: 50,
-        backSpeed: 30,
-        backDelay: 2000,
-        loop: true,
-        cursorChar: '_',
-    };
-    var typed = new Typed(".typed_text", options);
-</script>
+        // تشغيل فوري
+        updateClock();
+    </script>
 </body>
 </html>
